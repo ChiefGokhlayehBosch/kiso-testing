@@ -2,19 +2,9 @@ pipeline
 {
     agent
     {
-        kubernetes
+        docker
         {
-            containerTemplate
-            {
-                name 'kiso-build-env'
-                image 'eclipse/kiso-build-env:v0.0.5'
-                alwaysPullImage 'true'
-                ttyEnabled true
-                resourceRequestCpu '2'
-                resourceLimitCpu '2'
-                resourceRequestMemory '8Gi'
-                resourceLimitMemory '8Gi'
-            }
+            image 'kiso-build-env:v0.0.6'
         }
     }
 
