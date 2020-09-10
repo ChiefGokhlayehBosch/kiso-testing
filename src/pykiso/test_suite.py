@@ -27,12 +27,13 @@ from . import message
 
 class BaseTestSuite(unittest.TestCase):
 
-    def __init__(self, test_suite_id: int, test_case_id: int, aux_list, args, kwargs):
+    def __init__(self, test_entry_id: int, test_suite_id: int, test_case_id: int, aux_list, args, kwargs):
         """ Initialize generic test-case """
         # Initialize base class
         super(BaseTestSuite, self).__init__(*args, **kwargs)
         # Save test information
         self.test_auxiliary_list = aux_list or []
+        self.test_entry_id = test_entry_id
         self.test_suite_id = test_suite_id
         self.test_case_id = test_case_id
 
@@ -60,8 +61,8 @@ class BaseTestSuite(unittest.TestCase):
         :param test_command: A message you want to print while cleaning up the test
         """
         logging.info(
-            "--------------- {}: {} ---------------".format(
-                step_name, self.test_suite_id
+            "--------------- {}: {}, {} ---------------".format(
+                step_name, self.test_entry_id, self.test_suite_id
             )
         )
 
@@ -69,6 +70,7 @@ class BaseTestSuite(unittest.TestCase):
         testcase_setup_message = message.Message(
             msg_type=message.MessageType.COMMAND,
             sub_type=test_command,
+            test_entry=self.test_entry_id,
             test_suite=self.test_suite_id,
             test_case=0,
         )
@@ -93,11 +95,11 @@ class BaseTestSuite(unittest.TestCase):
 
 class BasicTestSuiteSetup(BaseTestSuite):
 
-    def __init__(self, test_suite_id: int, test_case_id: int, aux_list, args, kwargs):
+    def __init__(self, test_entry_id: int, test_suite_id: int, test_case_id: int, aux_list, args, kwargs):
         """ Initialize generic test-case """
         # Initialize base class
         super(BasicTestSuiteSetup, self).__init__(
-            test_suite_id, test_case_id, aux_list, args, kwargs)
+            test_entry_id, test_suite_id, test_case_id, aux_list, args, kwargs)
 
     def test_suite_setUp(self):
         self.base_function(
@@ -106,11 +108,11 @@ class BasicTestSuiteSetup(BaseTestSuite):
 
 class BasicTestSuiteTeardown(BaseTestSuite):
 
-    def __init__(self, test_suite_id: int, test_case_id: int, aux_list, args, kwargs):
+    def __init__(self, test_entry_id: int, test_suite_id: int, test_case_id: int, aux_list, args, kwargs):
         """ Initialize generic test-case """
         # Initialize base class
         super(BasicTestSuiteTeardown, self).__init__(
-            test_suite_id, test_case_id, aux_list, args, kwargs)
+            test_entry_id, test_suite_id, test_case_id, aux_list, args, kwargs)
 
     def test_suite_tearDown(self):
         self.base_function(
@@ -124,6 +126,7 @@ class BasicTestSuite(unittest.TestSuite):
         self,
         modules_to_add_dir: str,
         test_filter_pattern: str,
+        test_entry_id: int,
         test_suite_id: int,
         args,
         kwargs,
@@ -164,7 +167,7 @@ class BasicTestSuite(unittest.TestSuite):
 
 
 def get_suite_fixture(tc_list, fix_type):
-    """Retrieve test suite teardown and setup  
+    """Retrieve test suite teardown and setup
 
     :param tc_list: list of unittest.TestCase
     :param fix_type: type of fixture to search (setup/teardown)

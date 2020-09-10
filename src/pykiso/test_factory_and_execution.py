@@ -40,11 +40,12 @@ def create_test_suite(test_suite_dict: Dict) -> test_suite.BasicTestSuite:
     """ create a test suite based on the config dict
 
     :param test_suite_dict: dict created from config with keys 'suite_dir',
-        'test_filter_pattern', 'test_suite_id'
+        'test_filter_pattern', 'test_entry_id', 'test_suite_id'
     """
     return test_suite.BasicTestSuite(
         modules_to_add_dir=test_suite_dict["suite_dir"],
         test_filter_pattern=test_suite_dict["test_filter_pattern"],
+        test_entry_id=test_suite_dict["test_entry_id"],
         test_suite_id=test_suite_dict["test_suite_id"],
         args=[],
         kwargs={},
@@ -52,7 +53,7 @@ def create_test_suite(test_suite_dict: Dict) -> test_suite.BasicTestSuite:
 
 
 def run(config: Dict):
-    """ create test environment base on cofig and run tests
+    """ create test environment base on config and run tests
 
     :param config: dict from converted YAML config file"""
 
@@ -75,7 +76,8 @@ def run(config: Dict):
     try:
         list_of_test_suites = []
         for test_suite_configuration in config["test_suite_list"]:
-            list_of_test_suites.append(create_test_suite(test_suite_configuration))
+            list_of_test_suites.append(
+                create_test_suite(test_suite_configuration))
         # Start the test-suites & publish result
         for suite in list_of_test_suites:
             unittest.TextTestRunner().run(suite)

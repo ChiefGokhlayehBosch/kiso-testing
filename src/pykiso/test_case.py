@@ -38,6 +38,7 @@ class BasicTest(unittest.TestCase):
 
     def __init__(
         self,
+        test_entry_id: int = 0,
         test_suite_id: int = 0,
         test_case_id: int = 0,
         aux_list: List[AuxiliaryInterface] = None,
@@ -50,6 +51,7 @@ class BasicTest(unittest.TestCase):
         # Save list of test auxiliaries to use (already initialize)
         self.test_auxiliary_list = aux_list or []
         # Save test information
+        self.test_entry_id = test_entry_id
         self.test_suite_id = test_suite_id
         self.test_case_id = test_case_id
 
@@ -108,14 +110,15 @@ class BasicTest(unittest.TestCase):
 
     def setUp(self):
         logging.info(
-            "--------------- SETUP: {}, {} ---------------".format(
-                self.test_suite_id, self.test_case_id
+            "--------------- SETUP: {}, {}, {} ---------------".format(
+                self.test_entry_id, self.test_suite_id, self.test_case_id
             )
         )
         # Prepare message to send
         testcase_setup_message = message.Message(
             msg_type=message.MessageType.COMMAND,
             sub_type=message.MessageCommandType.TEST_CASE_SETUP,
+            test_entry=self.test_entry_id,
             test_suite=self.test_suite_id,
             test_case=self.test_case_id,
         )
@@ -136,14 +139,15 @@ class BasicTest(unittest.TestCase):
     # @timeout_decorator.timeout(5) # Timeout of 10 second as generic test-case # TODO: Only working on linux
     def test_run(self):
         logging.info(
-            "--------------- RUN: {}, {} ---------------".format(
-                self.test_suite_id, self.test_case_id
+            "--------------- RUN: {}, {}, {} ---------------".format(
+                self.test_entry_id, self.test_suite_id, self.test_case_id
             )
         )
         # Prepare message to send
         testcase_run_message = message.Message(
             msg_type=message.MessageType.COMMAND,
             sub_type=message.MessageCommandType.TEST_CASE_RUN,
+            test_entry=self.test_entry_id,
             test_suite=self.test_suite_id,
             test_case=self.test_case_id,
         )
@@ -155,7 +159,7 @@ class BasicTest(unittest.TestCase):
                 is not True
             ):
                 self.cleanup_and_skip("{} could not be run!".format(aux))
-        # Loop until all messages are recieved
+        # Loop until all messages are received
         list_of_aux_with_received_reports = [
             False] * len(self.test_auxiliary_list)
         while False in list_of_aux_with_received_reports:
@@ -171,14 +175,15 @@ class BasicTest(unittest.TestCase):
 
     def tearDown(self):
         logging.info(
-            "--------------- TEARDOWN: {}, {} ---------------".format(
-                self.test_suite_id, self.test_case_id
+            "--------------- TEARDOWN: {}, {}, {} ---------------".format(
+                self.test_entry_id, self.test_suite_id, self.test_case_id
             )
         )
         # Prepare message to send
         testcase_setup_message = message.Message(
             msg_type=message.MessageType.COMMAND,
             sub_type=message.MessageCommandType.TEST_CASE_TEARDOWN,
+            test_entry=self.test_entry_id,
             test_suite=self.test_suite_id,
             test_case=self.test_case_id,
         )
@@ -192,6 +197,7 @@ class BasicTest(unittest.TestCase):
 
 
 def define_test_parameters(
+    entry_id: int = 0,
     suite_id: int = 0,
     case_id: int = 0,
     aux_list: List[AuxiliaryInterface] = None,
@@ -206,6 +212,7 @@ def define_test_parameters(
             """Modified {DecoratedClass.__name__}, with the __init__ method
             already filled out with the following test-parameters:
 
+            Entry ID:    {entry_id}
             Suite ID:    {suite_id}
             Case ID:     {case_id}
             Auxiliaries: {auxes}"""
@@ -213,11 +220,12 @@ def define_test_parameters(
             @functools.wraps(DecoratedClass.__init__)
             def __init__(self, *args, **kwargs):
                 super(NewClass, self).__init__(
-                    suite_id, case_id, aux_list, args, kwargs,
+                    entry_id, suite_id, case_id, aux_list, args, kwargs,
                 )
 
         NewClass.__doc__ = NewClass.__doc__.format(
             DecoratedClass=DecoratedClass,
+            entry_id=entry_id,
             suite_id=suite_id,
             case_id=case_id,
             auxes=[aux.__class__.__name__ for aux in aux_list or []],

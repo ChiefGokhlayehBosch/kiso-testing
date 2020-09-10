@@ -62,7 +62,7 @@ class MessageCommandType(enum.IntEnum):
 
 @enum.unique
 class MessageReportType(enum.IntEnum):
-    """ List of possible recieved messages
+    """ List of possible received messages
     """
 
     TEST_PASS = 0
@@ -71,7 +71,7 @@ class MessageReportType(enum.IntEnum):
 
 @enum.unique
 class MessageAckType(enum.IntEnum):
-    """ List of possible recieved messages
+    """ List of possible received messages
     """
 
     ACK = 0
@@ -103,7 +103,7 @@ class Message:
     TYPE: msg_type | message_token | sub_type | errorCode |
 
     :raise:
-        * The message-type and sub-type are linked. a wrong combination can rais an error
+        * The message-type and sub-type are linked. a wrong combination can raise an error
 
     """
 
@@ -112,6 +112,7 @@ class Message:
         msg_type: MessageType = 0,
         sub_type=0,
         error_code: int = 0,
+        test_entry: int = 0,
         test_suite: int = 0,
         test_case: int = 0,
         tlv_dict=None,
@@ -127,8 +128,8 @@ class Message:
         :param error_code: Error value
         :type error_code: integer
 
-        :param test_section: Section value
-        :type test_section: integer
+        :param test_entry: Section value
+        :type test_entry: integer
 
         :param test_suite: Suite value
         :type test_suite: integer
@@ -145,7 +146,7 @@ class Message:
         message_counter += 1
         self.sub_type = sub_type
         self.error_code = error_code
-        self.reserved = 0
+        self.test_entry = test_entry
         self.test_suite = test_suite
         self.test_case = test_case
         self.tlv_dict = tlv_dict
@@ -153,12 +154,12 @@ class Message:
     def __str__(self):
         """ String representation of a message object
         """
-        string = "msg_type:{}, message_token:{}, type:{}, error_code:{}, reserved:{}, test_suite ID:{}, test_case ID:{}".format(
+        string = "msg_type:{}, message_token:{}, type:{}, error_code:{}, test_entry ID:{}, test_suite ID:{}, test_case ID:{}".format(
             self.msg_type,
             self.msg_token,
             self.sub_type,
             self.error_code,
-            self.reserved,
+            self.test_entry,
             self.test_suite,
             self.test_case,
         )
@@ -170,7 +171,7 @@ class Message:
         """ Serialize message into raw packet
 
         Format: | msg_type (1b)     | msg_token (1b)  | sub_type (1b)  | error_code (1b)     |
-                | test_section (1b) | test_suite (1b) | test_case (1b) | payload_length (1b) |
+                | test_entry (1b) | test_suite (1b) | test_case (1b) | payload_length (1b) |
                 | tlv_type (1b)     | tlv_size (1b)   | ...
 
         """
@@ -182,7 +183,7 @@ class Message:
             self.msg_token,
             int(self.sub_type),
             self.error_code,
-            self.reserved,
+            self.test_entry,
             self.test_suite,
             self.test_case,
         )
@@ -209,7 +210,8 @@ class Message:
                 elif isinstance(value, bytes):
                     parsed_value = value
                 else:
-                    logging.warning("{} is not a supported format".format(value))
+                    logging.warning(
+                        "{} is not a supported format".format(value))
                 # Add the TLV element:
                 payload += parsed_key
                 payload += struct.pack("B", len(parsed_value))
@@ -240,9 +242,10 @@ class Message:
         msg.msg_type = (MessageType)(int((unpack_header[0] & 0x30) >> 4))
         msg.msg_token = int(unpack_header[1])
         # Because the sub-type depend on the type:
-        msg.sub_type = (type_sub_type_dict[msg.msg_type])(int(unpack_header[2]))
+        msg.sub_type = (type_sub_type_dict[msg.msg_type])(
+            int(unpack_header[2]))
         msg.error_code = int(unpack_header[3])
-        msg.reserved = int(unpack_header[4])
+        msg.test_entry = int(unpack_header[4])
         msg.test_suite = int(unpack_header[5])
         msg.test_case = int(unpack_header[6])
         payload_length = int(raw_packet[7])
@@ -260,7 +263,7 @@ class Message:
         :param tlv_packet: raw TLV formated bytes array
         :type tlv_packet: bytes
 
-        :return: tuple conatining the extract tag(int) and value(list)
+        :return: tuple containing the extract tag(int) and value(list)
         """
         tlv_iterator = iter(tlv_packet)
         while True:
