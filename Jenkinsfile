@@ -12,6 +12,11 @@ pipeline
     {
         stage('Setup Env')
         {
+            environment {
+                WORKON_HOME = "/tmp/.venvs"
+                PIPENV_CACHE_DIR = "/tmp/.cache"
+            }
+
             steps
             {
                 script
@@ -34,6 +39,11 @@ pipeline
         }
         stage('Run unittests')
         {
+            environment {
+                WORKON_HOME = "/tmp/.venvs"
+                PIPENV_CACHE_DIR = "/tmp/.cache"
+            }
+
             steps
             {
                 script
@@ -56,6 +66,11 @@ pipeline
         }
         stage('Generate documentation')
         {
+            environment {
+                WORKON_HOME = "/tmp/.venvs"
+                PIPENV_CACHE_DIR = "/tmp/.cache"
+            }
+
             steps
             {
                 script
