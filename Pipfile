@@ -16,6 +16,10 @@ sphinxcontrib-programoutput = "*"
 sphinx-autodoc-typehints = "*"
 pytest-cov = "*"
 coverage = "*"
+pylint = "*"
+rope = "*"
+pre-commit = "*"
+black = "==20.8b1"
 
 [packages]
 pyserial = "*"
