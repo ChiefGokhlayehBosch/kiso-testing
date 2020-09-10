@@ -45,14 +45,15 @@ class CommunicationAuxiliary(AuxiliaryInterface):
         """ receive a raw message (bytes)
 
         :param blocking: wait for message till timeout elapses?
-        :param timeout_in_s: how longto wait
+        :param timeout_in_s: how long to wait
 
         :returns: raw message"""
 
         logging.debug(
             f"retrieving message in {self} (blocking={blocking}, timeout={timeout_in_s})"
         )
-        msg = self.wait_and_get_report(blocking=blocking, timeout_in_s=timeout_in_s)
+        msg = self.wait_and_get_report(
+            blocking=blocking, timeout_in_s=timeout_in_s)
         logging.debug(f"retrieved message '{msg}' in {self}")
         return msg
 
@@ -81,7 +82,8 @@ class CommunicationAuxiliary(AuxiliaryInterface):
             logging.debug(f"ignored command '{cmd_message} in {self}'")
             return True
         else:
-            logging.warning(f"received unkown command '{cmd_message} in {self}'")
+            logging.warning(
+                f"received unknown command '{cmd_message} in {self}'")
         return False
 
     def _abort_command(self):
@@ -91,7 +93,7 @@ class CommunicationAuxiliary(AuxiliaryInterface):
     def _receive_message(self, timeout_in_s):
         """ no-op since it's handled in _run_command """
         try:
-            rcv_data = self.channel.cc_receive(timeout=0, raw=True)
+            rcv_data = self.channel.cc_receive(timeout=0, raw=False)
             logging.debug(f"received message '{rcv_data}' from {self.channel}")
             return rcv_data
         except Exception:

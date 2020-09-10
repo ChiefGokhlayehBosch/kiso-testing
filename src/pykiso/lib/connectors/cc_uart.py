@@ -63,14 +63,15 @@ class CCUart(connector.CChannel):
     def _cc_close(self):
         self.serial.close()
 
-    def _cc_send(self, msg):
+    def _cc_send(self, msg, raw: bool = False):
         rawPacket = msg.serialize()
         # Use CRC to verify content
         crc = self._calculate_crc32(rawPacket)
-        rawPacket = struct.pack(">H", crc) + rawPacket  # Force big endian notation
+        # Force big endian notation
+        rawPacket = struct.pack(">H", crc) + rawPacket
         self._send_using_slip(rawPacket)
 
-    def _cc_receive(self, timeout=0.00001):
+    def _cc_receive(self, timeout=0.00001, raw: bool = False):
         if raw:
             raise NotImplementedError()
         self.serial.timeout = timeout
@@ -118,16 +119,16 @@ class CCUart(connector.CChannel):
                         receivingState = self.RECEIVED_DONE
 
             if receivingState == self.RECEIVED_DONE:
-                i = 0
-
-                expectedCRC = ((rawPacket[0] & 0xFF) << 8) + (rawPacket[1] & 0xFF)
-                rawPacket = rawPacket[2 : len(rawPacket)]
+                expectedCRC = ((rawPacket[0] & 0xFF)
+                               << 8) + (rawPacket[1] & 0xFF)
+                rawPacket = rawPacket[2: len(rawPacket)]
                 calculatedCRC = self._calculate_crc32(rawPacket)
 
                 if calculatedCRC != expectedCRC:
                     return None
         # Reception was a success, we need now to convert the list into a array of bytes
-        binary_message = b"".join(struct.pack("B", value) for value in rawPacket)
+        binary_message = b"".join(struct.pack("B", value)
+                                  for value in rawPacket)
         return message.Message.parse_packet(binary_message)
 
     def _send_using_slip(self, rawPacket):
@@ -157,7 +158,8 @@ class CCUart(connector.CChannel):
         CRC_BYTE_MASK = 0xFF
 
         for aByte in buffer:
-            crc = ((crc >> (CRC_BIT_SHIFT_8)) | (crc << (CRC_BIT_SHIFT_8))) & 0xFFFF
+            crc = ((crc >> (CRC_BIT_SHIFT_8)) | (
+                crc << (CRC_BIT_SHIFT_8))) & 0xFFFF
             crc = (crc ^ (aByte & CRC_BYTE_MASK)) & 0xFFFF
             crc = (crc ^ (crc & (CRC_BYTE_MASK)) >> (CRC_BIT_SHIFT_4)) & 0xFFFF
             crc = (crc ^ ((crc << (CRC_BIT_SHIFT_12)) & 0xFFFF)) & 0xFFFF

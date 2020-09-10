@@ -137,7 +137,8 @@ class AuxiliaryInterface(threading.Thread, metaclass=abc.ABCMeta):
             logging.debug(f"sent command '{cmd_message}' in {self}")
             # Wait until the test request was received
             try:
-                logging.debug(f"waiting for reply to command '{cmd_message}' in {self}")
+                logging.debug(
+                    f"waiting for reply to command '{cmd_message}' in {self}")
                 return_code = self.queue_out.get(blocking, timeout_in_s)
                 logging.debug(
                     f"reply to command '{cmd_message}' received: '{return_code}' in {self}"
@@ -189,7 +190,7 @@ class AuxiliaryInterface(threading.Thread, metaclass=abc.ABCMeta):
         while not self.stop_event.is_set():
             # Step 1: Check if a request is available & process it
             request = ""
-            # Check if a request was recieved
+            # Check if a request was received
             if not self.queue_in.empty():
                 request = self.queue_in.get_nowait()
             # Process the request
@@ -217,7 +218,8 @@ class AuxiliaryInterface(threading.Thread, metaclass=abc.ABCMeta):
                 self.queue_out.put(self._run_command(cmd, data))
             elif request != "":
                 # A request was received but could not be processed
-                logging.warning(f"Unknown request '{request}', will not be processed!")
+                logging.warning(
+                    f"Unknown request '{request}', will not be processed!")
                 logging.warning(f"Aux status: {self.__dict__}")
 
             # Step 2: Check if something was received from the aux instance if instance was created
