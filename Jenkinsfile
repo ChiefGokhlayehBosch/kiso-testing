@@ -49,7 +49,7 @@ pipeline
                 script
                 {
                     echo "Run all the unittests"
-                    sh 'pipenv run invoke unittest'
+                    sh 'pipenv run invoke test'
                     // TODO: call coverage report + save it
                 }
             }
