@@ -37,7 +37,7 @@ def test(c):
     Run tests
     """
     pty = platform.system() == "Linux"
-    c.run("pytest")
+    c.run("pytest --junitxml=build/pytest-report.xml")
 
 
 @task

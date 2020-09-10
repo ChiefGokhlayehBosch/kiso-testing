@@ -117,20 +117,16 @@ pipeline
         always
         {
             archiveArtifacts (
-                artifacts: 'TBD',
+                artifacts: 'build/pytest-report.xml',
                 fingerprint: true
             )
             junit (
                 allowEmptyResults: true,
-                testResults: 'TBD'
+                testResults: 'build/pytest-report.xml'
             )
         }
         success
         {
-            archiveArtifacts (
-                artifacts: 'builddir-debug/docs/doxygen/**, builddir-unittests/*_cov/**, docs/website/public/**/*',
-                fingerprint: true
-            )
             cleanWs()
         }
         unstable
